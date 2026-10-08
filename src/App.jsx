@@ -53,6 +53,11 @@ function Header({ cartCount, onCart, currency, onCurrencyChange }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
   useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 860) setMenuOpen(false) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+  useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     const onKey = (event) => { if (event.key === 'Escape') setMenuOpen(false) }
     window.addEventListener('keydown', onKey)
