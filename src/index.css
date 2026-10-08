@@ -164,6 +164,12 @@ h2{font-size:clamp(32px,8vw,44px)}
 .cart-total{margin:4px 0 6px;font:11px 'DM Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .cart-total b{color:var(--ink)}
 @media(max-width:560px){.boot-brand{font-size:17px}.boot-mark{width:58px;height:58px;font-size:29px}}
+/* Address map */
+.address-map{margin-top:34px;border-top:1px solid var(--line);padding-top:16px}
+.address-map-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;font:10px 'DM Mono';letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.address-map-head a{text-decoration:underline;text-underline-offset:4px;color:var(--ink);white-space:nowrap}
+.address-map iframe{display:block;width:100%;height:240px;border:1px solid var(--line);filter:saturate(.72)}
+@media(max-width:560px){.address-map iframe{height:220px}}
 /* ===== Fully responsive layer (authoritative - keep last) ===== */
 :root{--header-h:84px}
 html,body{max-width:100%;overflow-x:clip}
