@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Component, useEffect, useMemo, useState } from 'react'
+import { HashRouter, Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import wheat from './assets/Wheat.jpeg'
 import rice from './assets/Rice.jpeg'
 import vegetables from './assets/Fresh vegetables.webp'
@@ -38,9 +38,33 @@ const categories = [
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }, [pathname])
   return null
+}
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  componentDidCatch() {
+    this.setState({ hasError: true })
+  }
+  handleRetry = () => {
+    this.setState({ hasError: false })
+    window.location.hash = '#/'
+    window.location.reload()
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div className="app-error"><p className="eyebrow">SOMETHING WENT WRONG</p><h2>Please retry.</h2><p>The page hit a temporary error. Your cart selection is kept in this tab.</p><button className="button" type="button" onClick={this.handleRetry}>Retry now <span>↗</span></button></div>
+    }
+    return this.props.children
+  }
 }
 
 function Header({ cartCount, onCart, currency, onCurrencyChange }) {
@@ -211,7 +235,7 @@ function App() {
   const addToCart = (product) => { setCart((items) => items.some((item) => item.name === product.name) ? items.map((item) => item.name === product.name ? { ...item, quantity: item.quantity + 1 } : item) : [...items, { ...product, quantity: 1 }]); setCartOpen(true) }
   const changeQuantity = (name, change) => setCart((items) => items.map((item) => item.name === name ? { ...item, quantity: item.quantity + change } : item).filter((item) => item.quantity > 0))
   const cartCount = useMemo(() => cart.reduce((count, item) => count + item.quantity, 0), [cart])
-  return <BrowserRouter><BootLoader done={booted} /><RouteLoader /><ScrollToTop /><Header cartCount={cartCount} onCart={() => setCartOpen(true)} currency={currency} onCurrencyChange={setCurrency} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} currency={currency} />} /><Route path="/products" element={<Products onAdd={addToCart} currency={currency} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="*" element={<Home onAdd={addToCart} currency={currency} />} /></Routes></main><Footer /><Cart items={cart} open={cartOpen} currency={currency} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></BrowserRouter>
+  return <HashRouter><ErrorBoundary><BootLoader done={booted} /><RouteLoader /><ScrollToTop /><Header cartCount={cartCount} onCart={() => setCartOpen(true)} currency={currency} onCurrencyChange={setCurrency} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} currency={currency} />} /><Route path="/products" element={<Products onAdd={addToCart} currency={currency} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="*" element={<Home onAdd={addToCart} currency={currency} />} /></Routes></main><Footer /><Cart items={cart} open={cartOpen} currency={currency} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></ErrorBoundary></HashRouter>
 }
 
 export default App
