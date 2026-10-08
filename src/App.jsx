@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { BrowserRouter, Link, Route, Routes, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import wheat from './assets/Wheat.jpeg'
 import rice from './assets/Rice.jpeg'
 import vegetables from './assets/Fresh vegetables.webp'
@@ -11,16 +11,20 @@ import sugar from './assets/Sugar.jpeg'
 import pantry from './assets/Pantry products.jpeg'
 
 const products = [
-  { name: 'Wheat', category: 'Grains & Cereals', image: wheat, description: 'Reliable wholesale wheat sourcing for retailers, distributors and food producers.' },
-  { name: 'Rice', category: 'Grains & Cereals', image: rice, description: 'Everyday rice products selected for consistent quality and dependable supply.' },
-  { name: 'Fresh Vegetables', category: 'Fruits & Vegetables', image: vegetables, description: 'Fresh and seasonal vegetables sourced according to market availability.' },
-  { name: 'Fresh Fruits', category: 'Fruits & Vegetables', image: fruits, description: 'Selected fruit products for retail, food service and commercial buyers.' },
-  { name: 'Cooking Oils', category: 'Oils & Ingredients', image: oils, description: 'Cooking oils and edible products for professional kitchens and food businesses.' },
-  { name: 'Milk Products', category: 'Dairy & Eggs', image: dairy, description: 'Wholesale dairy products for retailers, restaurants and food-service partners.' },
-  { name: 'Coffee', category: 'Tea, Coffee & Spices', image: coffee, description: 'Popular coffee products for retail and hospitality requirements.' },
-  { name: 'Sugar', category: 'Sugar & Confectionery', image: sugar, description: 'Flexible sugar supply for businesses purchasing at wholesale volume.' },
-  { name: 'Pantry Products', category: 'General Food Products', image: pantry, description: 'Everyday grocery products tailored to your purchasing requirements.' },
+  { name: 'Wheat', category: 'Grains & Cereals', price: 24.5, image: wheat, description: 'Reliable wholesale wheat sourcing for retailers, distributors and food producers.' },
+  { name: 'Rice', category: 'Grains & Cereals', price: 31.75, image: rice, description: 'Everyday rice products selected for consistent quality and dependable supply.' },
+  { name: 'Fresh Vegetables', category: 'Fruits & Vegetables', price: 18.9, image: vegetables, description: 'Fresh and seasonal vegetables sourced according to market availability.' },
+  { name: 'Fresh Fruits', category: 'Fruits & Vegetables', price: 22.4, image: fruits, description: 'Selected fruit products for retail, food service and commercial buyers.' },
+  { name: 'Cooking Oils', category: 'Oils & Ingredients', price: 36.25, image: oils, description: 'Cooking oils and edible products for professional kitchens and food businesses.' },
+  { name: 'Milk Products', category: 'Dairy & Eggs', price: 29.8, image: dairy, description: 'Wholesale dairy products for retailers, restaurants and food-service partners.' },
+  { name: 'Coffee', category: 'Tea, Coffee & Spices', price: 48.5, image: coffee, description: 'Popular coffee products for retail and hospitality requirements.' },
+  { name: 'Sugar', category: 'Sugar & Confectionery', price: 21.6, image: sugar, description: 'Flexible sugar supply for businesses purchasing at wholesale volume.' },
+  { name: 'Pantry Products', category: 'General Food Products', price: 27.35, image: pantry, description: 'Everyday grocery products tailored to your purchasing requirements.' },
 ]
+
+const currencyRates = { USD: 1, GBP: 0.79, PLN: 4.02 }
+const currencySymbols = { USD: '$', GBP: '£', PLN: 'zł' }
+const formatPrice = (amount, currency) => `${currencySymbols[currency]}${(amount * currencyRates[currency]).toFixed(2)}`
 
 const categories = [
   ['01', 'Grains & Cereals', 'Grains, rice, oats and cereal products for reliable everyday supply.', wheat],
@@ -31,19 +35,56 @@ const categories = [
   ['06', 'Sugar & Confectionery', 'Sugar, chocolate and confectionery products at wholesale.', sugar],
 ]
 
-function Header({ cartCount, onCart }) {
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [pathname])
+  return null
+}
+
+function Header({ cartCount, onCart, currency, onCurrencyChange }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const closeMenu = () => setMenuOpen(false)
-  return <header className={`site-header ${menuOpen ? 'menu-open' : ''}`}>
-    <Link to="/" className="brand"><span className="brand-mark">M</span><span>MAGNOVIX<small>WHOLESALE SUPPLY</small></span></Link>
-    <nav id="main-navigation" aria-label="Main navigation">
-      <Link to="/" onClick={closeMenu}>Home</Link><Link to="/products" onClick={closeMenu}>Products</Link><Link to="/about" onClick={closeMenu}>About us</Link><Link to="/contact" onClick={closeMenu}>Get in touch</Link>
-    </nav>
-    <div className="header-actions">
-      <button className="cart-button" onClick={onCart} aria-label={`Open cart, ${cartCount} items`}><span className="cart-label">Cart</span><b>{cartCount}</b><span className="cart-arrow">↗</span><span className="cart-icon" aria-hidden="true">▱</span></button>
-      <button className="menu-toggle" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="main-navigation" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}><span /><span /></button>
-    </div>
-  </header>
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    const onKey = (event) => { if (event.key === 'Escape') setMenuOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [menuOpen])
+  const linkClass = ({ isActive }) => `nav-link${isActive ? ' active' : ''}`
+  return <>
+    <div className={`nav-backdrop${menuOpen ? ' show' : ''}`} onClick={() => setMenuOpen(false)} aria-hidden="true" />
+    <header className={`site-header${menuOpen ? ' menu-open' : ''}${scrolled ? ' is-scrolled' : ''}`}>
+      <Link to="/" className="brand" onClick={() => setMenuOpen(false)} aria-label="Magnovix home"><span className="brand-mark">M</span><span>MAGNOVIX<small>WHOLESALE SUPPLY</small></span></Link>
+      <nav id="main-navigation" aria-label="Main navigation">
+        <div className="mobile-nav-head"><span>MENU</span><button className="nav-close" onClick={() => setMenuOpen(false)} aria-label="Close navigation menu">×</button></div>
+        <NavLink to="/" end className={linkClass} onClick={() => setMenuOpen(false)}><span className="nav-num">01</span>Home</NavLink>
+        <NavLink to="/products" className={linkClass} onClick={() => setMenuOpen(false)}><span className="nav-num">02</span>Products</NavLink>
+        <NavLink to="/about" className={linkClass} onClick={() => setMenuOpen(false)}><span className="nav-num">03</span>About us</NavLink>
+        <NavLink to="/contact" className={linkClass} onClick={() => setMenuOpen(false)}><span className="nav-num">04</span>Get in touch</NavLink>
+        <Link to="/contact" className="button nav-cta" onClick={() => setMenuOpen(false)}>Request a quote<span>↗</span></Link>
+      </nav>
+      <div className="header-actions">
+        <label className="currency-picker"><span className="currency-label">Currency</span>
+          <select value={currency} onChange={(event) => onCurrencyChange(event.target.value)} aria-label="Select currency">
+            <option value="USD">USD</option><option value="GBP">GBP</option><option value="PLN">PLN</option>
+          </select>
+        </label>
+        <button className="cart-button" onClick={onCart} aria-label={`Open cart, ${cartCount} items`}><span className="cart-label">Cart</span><b>{cartCount}</b><span className="cart-arrow">↗</span><svg className="cart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6.1M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" /></svg></button>
+        <button className={`menu-toggle${menuOpen ? ' open' : ''}`} onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="main-navigation" aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}><span /><span /><span /></button>
+      </div>
+    </header>
+  </>
 }
 
 function Button({ children, to, onClick, light = false }) {
@@ -51,7 +92,7 @@ function Button({ children, to, onClick, light = false }) {
   return to ? <Link to={to} className={className}>{children}<span>↗</span></Link> : <button onClick={onClick} className={className}>{children}<span>↗</span></button>
 }
 
-function Home({ onAdd }) {
+function Home({ onAdd, currency }) {
   const navigate = useNavigate()
   return <div>
     <section className="hero">
@@ -72,7 +113,7 @@ function Home({ onAdd }) {
 
     <section className="products-strip section-pad">
       <div className="section-heading"><div><p className="eyebrow">WHAT WE SUPPLY</p><h2>Products for<br /><em>real businesses.</em></h2></div><Link to="/products" className="underlined-link">View all products ↗</Link></div>
-      <div className="product-grid">{products.slice(0, 4).map((product) => <ProductCard key={product.name} product={product} onAdd={onAdd} />)}</div>
+      <div className="product-grid">{products.slice(0, 4).map((product) => <ProductCard key={product.name} product={product} onAdd={onAdd} currency={currency} />)}</div>
     </section>
 
     <section className="values-section">
@@ -89,12 +130,12 @@ function Home({ onAdd }) {
   </div>
 }
 
-function ProductCard({ product, onAdd }) {
-  return <article className="product-card"><Link to="/products"><div className="product-image"><img src={product.image} alt={product.name} /><span>Wholesale</span></div><div className="product-info"><div><h3>{product.name}</h3><p>{product.category}</p></div><button onClick={(e) => { e.preventDefault(); onAdd(product) }} aria-label={`Add ${product.name} to cart`}>+</button></div></Link></article>
+function ProductCard({ product, onAdd, currency }) {
+  return <article className="product-card"><Link to="/products"><div className="product-image"><img src={product.image} alt={product.name} /><span>Wholesale</span></div><div className="product-info"><div><h3>{product.name}</h3><p>{product.category}</p><strong className="product-price">{formatPrice(product.price, currency)} <small>/ unit</small></strong></div><button onClick={(e) => { e.preventDefault(); onAdd(product) }} aria-label={`Add ${product.name} to cart`}>+</button></div></Link></article>
 }
 
-function Products({ onAdd }) {
-  return <div className="page"><div className="page-hero"><p className="eyebrow">THE MAGNOVIX RANGE</p><h1>Products for<br /><em>wholesale buyers.</em></h1><p>Availability changes with market conditions and supplier requirements. If you do not see what you need, ask us.</p></div><section className="section-pad catalogue"><div className="catalogue-intro"><p className="eyebrow">01 / PRODUCTS</p><h2>Quality, value,<br /><em>reliability.</em></h2><Button to="/contact">Request a quote</Button></div><div className="full-product-grid">{products.map((product) => <ProductCard key={product.name} product={product} onAdd={onAdd} />)}</div></section></div>
+function Products({ onAdd, currency }) {
+  return <div className="page"><div className="page-hero"><p className="eyebrow">THE MAGNOVIX RANGE</p><h1>Products for<br /><em>wholesale buyers.</em></h1><p>Availability changes with market conditions and supplier requirements. If you do not see what you need, ask us.</p></div><section className="section-pad catalogue"><div className="catalogue-intro"><p className="eyebrow">01 / PRODUCTS</p><h2>Quality, value,<br /><em>reliability.</em></h2><Button to="/contact">Request a quote</Button></div><div className="full-product-grid">{products.map((product) => <ProductCard key={product.name} product={product} onAdd={onAdd} currency={currency} />)}</div></section></div>
 }
 
 function About() {
@@ -105,8 +146,8 @@ function Contact() {
   return <div className="page"><div className="page-hero contact-hero"><p className="eyebrow">GET IN TOUCH</p><h1>Let's talk about<br /><em>your requirements.</em></h1><p>Tell us what you need, and our team will review your request and get back to you.</p></div><section className="contact-section section-pad"><div className="contact-details"><p className="eyebrow">CONTACT DETAILS</p><h2>MAGNOVIX<br /><em>sp. z o.o.</em></h2><p>Poznań, Poland</p><a href="mailto:info@magnovix.com">info@magnovix.com ↗</a><p className="muted">Replace with your actual company phone number.</p></div><form className="contact-form" onSubmit={(e) => e.preventDefault()}><label>Full name<input placeholder="Your name" required /></label><label>Company name<input placeholder="Your company" /></label><label>Email address<input type="email" placeholder="you@company.com" required /></label><label>What can we help with?<textarea placeholder="Tell us about your products, quantities and delivery needs..." rows="5" required /></label><button className="button" type="submit">Send request <span>↗</span></button></form></section></div>
 }
 
-function Cart({ items, onClose, onChange }) {
-  return <aside className={`cart-drawer ${items.open ? 'is-open' : ''}`}><div className="cart-head"><div><p className="eyebrow">YOUR SELECTION</p><h2>Wholesale cart</h2></div><button onClick={onClose} aria-label="Close cart">×</button></div>{items.length === 0 ? <div className="empty-cart"><span>+</span><p>Your cart is empty.</p><small>Add products to send a wholesale request.</small></div> : <><div className="cart-items">{items.map((item) => <div className="cart-item" key={item.name}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{item.category}</p><div className="quantity"><button onClick={() => onChange(item.name, -1)}>−</button><span>{item.quantity}</span><button onClick={() => onChange(item.name, 1)}>+</button></div></div></div>)}</div><Button to="/contact">Request wholesale quote</Button></>}</aside>
+function Cart({ items, onClose, onChange, currency }) {
+  return <aside className={`cart-drawer ${items.open ? 'is-open' : ''}`}><div className="cart-head"><div><p className="eyebrow">YOUR SELECTION</p><h2>Wholesale cart</h2></div><button onClick={onClose} aria-label="Close cart">×</button></div>{items.length === 0 ? <div className="empty-cart"><span>+</span><p>Your cart is empty.</p><small>Add products to send a wholesale request.</small></div> : <><div className="cart-items">{items.map((item) => <div className="cart-item" key={item.name}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{formatPrice(item.price, currency)} / unit</p><div className="quantity"><button onClick={() => onChange(item.name, -1)}>−</button><span>{item.quantity}</span><button onClick={() => onChange(item.name, 1)}>+</button></div></div></div>)}</div><Button to="/contact">Request wholesale quote</Button></>}</aside>
 }
 
 function Footer() {
@@ -116,10 +157,11 @@ function Footer() {
 function App() {
   const [cart, setCart] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
+  const [currency, setCurrency] = useState('USD')
   const addToCart = (product) => { setCart((items) => items.some((item) => item.name === product.name) ? items.map((item) => item.name === product.name ? { ...item, quantity: item.quantity + 1 } : item) : [...items, { ...product, quantity: 1 }]); setCartOpen(true) }
   const changeQuantity = (name, change) => setCart((items) => items.map((item) => item.name === name ? { ...item, quantity: item.quantity + change } : item).filter((item) => item.quantity > 0))
   const cartCount = useMemo(() => cart.reduce((count, item) => count + item.quantity, 0), [cart])
-  return <BrowserRouter><Header cartCount={cartCount} onCart={() => setCartOpen(true)} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} />} /><Route path="/products" element={<Products onAdd={addToCart} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="*" element={<Home onAdd={addToCart} />} /></Routes></main><Footer /><Cart items={Object.assign([...cart], { open: cartOpen })} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></BrowserRouter>
+  return <BrowserRouter><ScrollToTop /><Header cartCount={cartCount} onCart={() => setCartOpen(true)} currency={currency} onCurrencyChange={setCurrency} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} currency={currency} />} /><Route path="/products" element={<Products onAdd={addToCart} currency={currency} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="*" element={<Home onAdd={addToCart} currency={currency} />} /></Routes></main><Footer /><Cart items={Object.assign([...cart], { open: cartOpen })} currency={currency} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></BrowserRouter>
 }
 
 export default App
