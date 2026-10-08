@@ -89,7 +89,23 @@ function Header({ cartCount, onCart, currency, onCurrencyChange }) {
 
 function Button({ children, to, onClick, light = false }) {
   const className = `button ${light ? 'button-light' : ''}`
-  return to ? <Link to={to} className={className}>{children}<span>↗</span></Link> : <button onClick={onClick} className={className}>{children}<span>↗</span></button>
+  return to ? <Link to={to} className={className} onClick={onClick}>{children}<span>↗</span></Link> : <button type="button" onClick={onClick} className={className}>{children}<span>↗</span></button>
+}
+
+function BootLoader({ done }) {
+  return <div className={`boot-loader${done ? ' done' : ''}`} aria-hidden={done ? 'true' : 'false'}>
+    <div className="boot-inner">
+      <span className="brand-mark boot-mark">M</span>
+      <p className="boot-brand">MAGNOVIX</p>
+      <p className="boot-sub">WHOLESALE SUPPLY</p>
+      <div className="boot-bar" aria-hidden="true"><span /></div>
+    </div>
+  </div>
+}
+
+function RouteLoader() {
+  const { pathname } = useLocation()
+  return <div className="route-bar" key={pathname} aria-hidden="true"><span /></div>
 }
 
 function Home({ onAdd, currency }) {
@@ -146,8 +162,32 @@ function Contact() {
   return <div className="page"><div className="page-hero contact-hero"><p className="eyebrow">GET IN TOUCH</p><h1>Let's talk about<br /><em>your requirements.</em></h1><p>Tell us what you need, and our team will review your request and get back to you.</p></div><section className="contact-section section-pad"><div className="contact-details"><p className="eyebrow">CONTACT DETAILS</p><h2>MAGNOVIX<br /><em>sp. z o.o.</em></h2><p>Poznań, Poland</p><a href="mailto:info@magnovix.com">info@magnovix.com ↗</a><p className="muted">Replace with your actual company phone number.</p></div><form className="contact-form" onSubmit={(e) => e.preventDefault()}><label>Full name<input placeholder="Your name" required /></label><label>Company name<input placeholder="Your company" /></label><label>Email address<input type="email" placeholder="you@company.com" required /></label><label>What can we help with?<textarea placeholder="Tell us about your products, quantities and delivery needs..." rows="5" required /></label><button className="button" type="submit">Send request <span>↗</span></button></form></section></div>
 }
 
-function Cart({ items, onClose, onChange, currency }) {
-  return <aside className={`cart-drawer ${items.open ? 'is-open' : ''}`}><div className="cart-head"><div><p className="eyebrow">YOUR SELECTION</p><h2>Wholesale cart</h2></div><button onClick={onClose} aria-label="Close cart">×</button></div>{items.length === 0 ? <div className="empty-cart"><span>+</span><p>Your cart is empty.</p><small>Add products to send a wholesale request.</small></div> : <><div className="cart-items">{items.map((item) => <div className="cart-item" key={item.name}><img src={item.image} alt="" /><div><h3>{item.name}</h3><p>{formatPrice(item.price, currency)} / unit</p><div className="quantity"><button onClick={() => onChange(item.name, -1)}>−</button><span>{item.quantity}</span><button onClick={() => onChange(item.name, 1)}>+</button></div></div></div>)}</div><Button to="/contact">Request wholesale quote</Button></>}</aside>
+function Cart({ items, open, onClose, onChange, currency }) {
+  useEffect(() => {
+    if (!open) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (event) => { if (event.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = previous
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open, onClose])
+  const totalCount = items.reduce((count, item) => count + item.quantity, 0)
+  return <>
+    <div className={`cart-backdrop${open ? ' show' : ''}`} onClick={onClose} aria-hidden="true" />
+    <aside className={`cart-drawer${open ? ' is-open' : ''}`} aria-hidden={!open} aria-label="Wholesale cart">
+      <div className="cart-head"><div><p className="eyebrow">YOUR SELECTION</p><h2>Wholesale cart</h2></div><button onClick={onClose} aria-label="Close cart">×</button></div>
+      {items.length === 0
+        ? <div className="empty-cart"><span>+</span><p>Your cart is empty.</p><small>Add products to send a wholesale request.</small></div>
+        : <>
+          <div className="cart-items">{items.map((item) => <div className="cart-item" key={item.name}><img src={item.image} alt={item.name} /><div><h3>{item.name}</h3><p>{formatPrice(item.price, currency)} / unit</p><div className="quantity"><button onClick={() => onChange(item.name, -1)} aria-label={`Remove one ${item.name}`}>−</button><span>{item.quantity}</span><button onClick={() => onChange(item.name, 1)} aria-label={`Add one ${item.name}`}>+</button></div></div></div>)}</div>
+          <p className="cart-total">Items in cart: <b>{totalCount}</b></p>
+          <Button to="/contact" onClick={onClose}>Request wholesale quote</Button>
+        </>}
+    </aside>
+  </>
 }
 
 function Footer() {
@@ -158,10 +198,15 @@ function App() {
   const [cart, setCart] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
   const [currency, setCurrency] = useState('USD')
+  const [booted, setBooted] = useState(false)
+  useEffect(() => {
+    const timer = setTimeout(() => setBooted(true), 1500)
+    return () => clearTimeout(timer)
+  }, [])
   const addToCart = (product) => { setCart((items) => items.some((item) => item.name === product.name) ? items.map((item) => item.name === product.name ? { ...item, quantity: item.quantity + 1 } : item) : [...items, { ...product, quantity: 1 }]); setCartOpen(true) }
   const changeQuantity = (name, change) => setCart((items) => items.map((item) => item.name === name ? { ...item, quantity: item.quantity + change } : item).filter((item) => item.quantity > 0))
   const cartCount = useMemo(() => cart.reduce((count, item) => count + item.quantity, 0), [cart])
-  return <BrowserRouter><ScrollToTop /><Header cartCount={cartCount} onCart={() => setCartOpen(true)} currency={currency} onCurrencyChange={setCurrency} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} currency={currency} />} /><Route path="/products" element={<Products onAdd={addToCart} currency={currency} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="*" element={<Home onAdd={addToCart} currency={currency} />} /></Routes></main><Footer /><Cart items={Object.assign([...cart], { open: cartOpen })} currency={currency} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></BrowserRouter>
+  return <BrowserRouter><BootLoader done={booted} /><RouteLoader /><ScrollToTop /><Header cartCount={cartCount} onCart={() => setCartOpen(true)} currency={currency} onCurrencyChange={setCurrency} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} currency={currency} />} /><Route path="/products" element={<Products onAdd={addToCart} currency={currency} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="*" element={<Home onAdd={addToCart} currency={currency} />} /></Routes></main><Footer /><Cart items={cart} open={cartOpen} currency={currency} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></BrowserRouter>
 }
 
 export default App
