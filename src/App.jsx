@@ -9,6 +9,7 @@ import dairy from './assets/Milk products.jpeg'
 import coffee from './assets/Coffee.jpeg'
 import sugar from './assets/Sugar.jpeg'
 import pantry from './assets/Pantry products.jpeg'
+import DeveloperProfile from './DeveloperProfile.jsx'
 
 const products = [
   { name: 'Wheat', category: 'Grains & Cereals', price: 24.5, image: wheat, description: 'Reliable wholesale wheat sourcing for retailers, distributors and food producers.' },
@@ -220,7 +221,7 @@ function Cart({ items, open, onClose, onChange, currency }) {
 }
 
 function Footer() {
-  return <footer><div className="footer-main"><Link to="/" className="brand"><span className="brand-mark">M</span><span>MAGNOVIX<small>WHOLESALE SUPPLY</small></span></Link><p>Reliable wholesale.<br />Professional business.<br />Strong partnerships.</p><div className="footer-links"><Link to="/products">Products</Link><Link to="/about">About us</Link><Link to="/contact">Get in touch</Link></div><div className="footer-contact"><span>Poznań, Poland</span><a href="mailto:info@magnovix.com">info@magnovix.com ↗</a></div></div><div className="footer-bottom"><span>© 2025 MAGNOVIX sp. z o.o.</span><span>Quality · Value · Reliability · Service</span></div></footer>
+  return <footer><div className="footer-main"><Link to="/" className="brand"><span className="brand-mark">M</span><span>MAGNOVIX<small>WHOLESALE SUPPLY</small></span></Link><p>Reliable wholesale.<br />Professional business.<br />Strong partnerships.</p><div className="footer-links"><Link to="/products">Products</Link><Link to="/about">About us</Link><Link to="/contact">Get in touch</Link><Link to="/developer" className="button footer-developer-link">Developer <span>↗</span></Link></div><div className="footer-contact"><span>Poznań, Poland</span><a href="mailto:info@magnovix.com">info@magnovix.com ↗</a></div></div><div className="footer-bottom"><span>© 2025 MAGNOVIX sp. z o.o.</span><span>Quality · Value · Reliability · Service</span></div></footer>
 }
 
 function App() {
@@ -235,7 +236,7 @@ function App() {
   const addToCart = (product) => { setCart((items) => items.some((item) => item.name === product.name) ? items.map((item) => item.name === product.name ? { ...item, quantity: item.quantity + 1 } : item) : [...items, { ...product, quantity: 1 }]); setCartOpen(true) }
   const changeQuantity = (name, change) => setCart((items) => items.map((item) => item.name === name ? { ...item, quantity: item.quantity + change } : item).filter((item) => item.quantity > 0))
   const cartCount = useMemo(() => cart.reduce((count, item) => count + item.quantity, 0), [cart])
-  return <HashRouter><ErrorBoundary><BootLoader done={booted} /><RouteLoader /><ScrollToTop /><Header cartCount={cartCount} onCart={() => setCartOpen(true)} currency={currency} onCurrencyChange={setCurrency} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} currency={currency} />} /><Route path="/products" element={<Products onAdd={addToCart} currency={currency} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="*" element={<Home onAdd={addToCart} currency={currency} />} /></Routes></main><Footer /><Cart items={cart} open={cartOpen} currency={currency} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></ErrorBoundary></HashRouter>
+  return <HashRouter><ErrorBoundary><BootLoader done={booted} /><RouteLoader /><ScrollToTop /><Header cartCount={cartCount} onCart={() => setCartOpen(true)} currency={currency} onCurrencyChange={setCurrency} /><main><Routes><Route path="/" element={<Home onAdd={addToCart} currency={currency} />} /><Route path="/products" element={<Products onAdd={addToCart} currency={currency} />} /><Route path="/about" element={<About />} /><Route path="/contact" element={<Contact />} /><Route path="/developer" element={<DeveloperProfile />} /><Route path="*" element={<Home onAdd={addToCart} currency={currency} />} /></Routes></main><Footer /><Cart items={cart} open={cartOpen} currency={currency} onClose={() => setCartOpen(false)} onChange={changeQuantity} /></ErrorBoundary></HashRouter>
 }
 
 export default App

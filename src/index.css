@@ -134,6 +134,50 @@ h2{font-size:clamp(32px,8vw,44px)}
 }
 /* Motion + polish */
 @media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+/* ===== Developer profile ===== */
+.footer-developer-link{color:var(--ink);background:var(--lime);font-weight:600;padding:10px 14px;font-size:12px}
+.footer-developer-link span{font-size:15px;margin-left:6px}
+.developer-hero{display:grid;grid-template-columns:1.08fr .92fr;background:var(--cream);min-height:570px;padding:96px 8.5vw 86px}
+.developer-hero-copy{padding-right:8vw}
+.developer-hero h1{font-size:clamp(48px,6vw,82px);line-height:.98;letter-spacing:-.06em;margin:0 0 28px;font-weight:600}
+.developer-hero h1 em,.developer-identity em,.developer-cta em{font:italic 600 .95em 'Playfair Display';letter-spacing:-.04em}
+.developer-hero .hero-text{max-width:510px}
+.developer-identity{align-self:center;border-left:1px solid #cbd0c4;padding:20px 0 20px 55px}
+.developer-monogram{display:grid;place-items:center;width:92px;height:92px;border-radius:50%;background:var(--ink);color:var(--lime);font:600 27px 'Playfair Display';letter-spacing:.05em;margin-bottom:34px}
+.developer-identity .eyebrow{margin-bottom:14px}
+.developer-identity h2{font-size:clamp(32px,4vw,54px);margin-bottom:24px}
+.developer-identity>a,.developer-contact-line a{font:12px 'DM Mono';text-decoration:underline;text-underline-offset:5px}
+.developer-about{display:grid;grid-template-columns:1fr 1fr;gap:10%;background:var(--paper)}
+.developer-about-copy{max-width:560px}
+.developer-about-copy>p:not(.large-copy){color:var(--muted);line-height:1.75}
+.developer-contact-line{display:flex;gap:28px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:34px;padding-top:18px}
+.developer-services{background:#e4e6dd}
+.developer-section-note{font:11px 'DM Mono';color:var(--muted)}
+.developer-service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.developer-service-card{position:relative;min-height:240px;padding:22px;background:var(--paper);border:1px solid #d7dbd0;border-radius:var(--radius);transition:transform .25s,box-shadow .25s}
+.developer-service-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.developer-service-number{font:10px 'DM Mono';color:#71850b}
+.developer-service-icon{display:grid;place-items:center;width:42px;height:42px;margin:27px 0 22px;border-radius:50%;background:var(--lime);font-size:20px}
+.developer-service-card h3{font:italic 21px 'Playfair Display';line-height:1.15;margin:0 0 10px}
+.developer-service-card p{font-size:12px;line-height:1.55;color:var(--muted);margin:0}
+.developer-benefits{display:grid;grid-template-columns:1fr 1fr;gap:10%;background:var(--ink);color:var(--paper)}
+.developer-benefits .eyebrow{color:#9ca99f}
+.developer-benefits h2{margin-bottom:26px}
+.developer-benefits .large-copy{color:#b2bdb5;font-size:17px;max-width:410px}
+.developer-benefit-list{display:grid;grid-template-columns:1fr 1fr;align-content:start;border-top:1px solid #465751}
+.developer-benefit-list div{display:flex;gap:12px;padding:16px 10px 16px 0;border-bottom:1px solid #465751}
+.developer-benefit-list div:nth-child(even){padding-left:18px;border-left:1px solid #465751}
+.developer-benefit-list span{font:10px 'DM Mono';color:var(--lime);padding-top:3px}
+.developer-benefit-list p{margin:0;font-size:13px;line-height:1.4;color:#c6cec8}
+.developer-cta{padding:90px 8.5vw;background:#5b6d41;color:var(--paper)}
+.developer-cta .eyebrow{color:#c4cfbd}
+.developer-cta h2{margin-bottom:20px}
+.developer-cta>p:not(.eyebrow){max-width:570px;color:#d8dfd5;line-height:1.65}
+.developer-cta-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.developer-cta-actions .button:not(.button-light){background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.34)}
+@media(max-width:1100px){.developer-hero{padding-left:6vw;padding-right:6vw}.developer-service-grid{grid-template-columns:repeat(2,1fr)}.developer-cta{padding-left:6vw;padding-right:6vw}}
+@media(max-width:860px){.developer-hero,.developer-about,.developer-benefits{grid-template-columns:1fr;gap:40px}.developer-hero{min-height:0;padding:64px 5.5vw}.developer-hero-copy{padding-right:0}.developer-identity{border-left:0;border-top:1px solid #cbd0c4;padding:40px 0 0}.developer-about{padding-top:60px;padding-bottom:60px}.developer-services{padding-top:60px;padding-bottom:60px}.developer-benefits{padding-top:60px;padding-bottom:60px}.developer-cta{padding:64px 5.5vw}}
+@media(max-width:560px){.developer-hero h1{font-size:clamp(42px,12vw,60px)}.developer-hero .hero-actions{align-items:stretch}.developer-hero .hero-actions .button{width:100%;justify-content:center}.developer-hero .hero-actions .text-button{padding:14px 0}.developer-service-grid,.developer-benefit-list{grid-template-columns:1fr}.developer-benefit-list div:nth-child(even){padding-left:0;border-left:0}.developer-cta-actions{flex-direction:column;align-items:stretch}.developer-cta-actions .button{justify-content:center}}
 ::selection{background:var(--lime);color:var(--ink)}
 /* Override legacy mobile dropdown so drawer wins */
 @media(max-width:860px){
